@@ -15,7 +15,8 @@ app.use(function(req, res) {
   res.sendFile(path.join(__dirname, '../client/index.html'))
 })
 
-var server = app.listen(3000, function(error) {
+var serverPort = process.env.PORT || 3000;
+var server = app.listen(serverPort, function(error) {
   if (error) {
     console.error(error)
   } else {
