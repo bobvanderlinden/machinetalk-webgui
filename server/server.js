@@ -20,6 +20,10 @@ var server = app.listen(serverPort, function(error) {
   if (error) {
     console.error(error)
   } else {
-    console.info('Listening on', server.address().address + ':' + server.address().port)
+    console.info(
+      'Listening on',
+      server.address().address + ':' + server.address().port,
+      '(http://localhost:' + server.address().port + '/)'
+    )
   }
 })
