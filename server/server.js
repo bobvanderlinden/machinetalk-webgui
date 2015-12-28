@@ -78,7 +78,8 @@ Machine.prototype._handleOnline = function() {
   debug('Machine ' + this.uuid + ' online');
 
   this.emit('online');
-  io.emit('machine:online', {
+  io.emit('action', {
+    type: 'machine:online',
     uuid: this.uuid,
     host: this.host
   });
@@ -91,7 +92,8 @@ Machine.prototype._handleOffline = function() {
   debug('Machine ' + this.uuid + ' offline');
 
   this.emit('offline');
-  io.emit('machine:offline', {
+  io.emit('action', {
+    type: 'machine:offline',
     uuid: this.uuid,
     host: this.host
   });
@@ -104,7 +106,11 @@ Machine.prototype.subscribe = function(socket) {
   clearTimeout(this.idleTimeout);
   this.subscriptions.push(socket);
   this.connect();
-  socket.emit('machine:status', this.uuid, this.clients.status.status);
+  socket.emit('action', {
+    type: 'machine:status',
+    uuid: this.uuid,
+    status: this.clients.status.status
+  });
 };
 Machine.prototype.unsubscribe = function(socket) {
   debug('Unsubscribe from machine', this.uuid);
@@ -159,7 +165,11 @@ Machine.prototype._initializeStatus = function(dsn) {
 Machine.prototype._handleStatus = function(status) {
   var me = this;
   me.subscriptions.forEach(function(subscription) {
-    subscription.emit('machine:status', me.uuid, status);
+    subscription.emit('action', {
+      type: 'machine:status',
+      uuid: me.uuid,
+      status: status
+    });
   });
 };
 
@@ -183,19 +193,32 @@ Machine.prototype._initializeError = function(dsn) {
 Machine.prototype._handleError = function(message) {
   var me = this;
   me.subscriptions.forEach(function(subscription) {
-    subscription.emit('machine:error', me.uuid, message);
+    subscription.emit('action', {
+      type: 'machine:error',
+      uuid: me.uuid,
+      message: message
+    });
   });
 };
 Machine.prototype._handleDisplay = function(message) {
   var me = this;
   me.subscriptions.forEach(function(subscription) {
-    subscription.emit('machine:display', me.uuid, message);
+    subscription.emit('action', {
+      type: 'machine:display',
+      uuid: me.uuid,
+      message: message
+    });
   });
 };
 Machine.prototype._handleText = function(type, message) {
   var me = this;
   me.subscriptions.forEach(function(subscription) {
-    subscription.emit('machine:text', me.uuid, type, message);
+    subscription.emit('action', {
+      type: 'machine:text',
+      uuid: me.uuid,
+      type: type,
+      message: message
+    });
   });
 };
 
@@ -207,7 +230,11 @@ Machine.prototype._initializePreview = function(dsn) {
 Machine.prototype._handlePreview = function(preview) {
   var me = this;
   me.subscriptions.forEach(function(subscription) {
-    subscription.emit('machine:preview', me.uuid, preview);
+    subscription.emit('action', {
+      type: 'machine:preview',
+      uuid: me.uuid,
+      preview: preview
+    });
   });
 };
 
@@ -262,30 +289,34 @@ io.on('connection', function(socket) {
 
   debug('Emitting ' + getMachines().length + ' machines to socket');
   getMachines().forEach(function(machine) {
-    socket.emit(machine.isOnline ? 'machine:online' : 'machine:offline', {
+    socket.emit('action', {
+      type: machine.isOnline ? 'machine:online' : 'machine:offline',
       uuid: machine.uuid,
       host: machine.host
     });
   });
 
-  socket.on('machine:subscribe', function(uuid) {
-    debug('Socket subscribe to ' + uuid);
+  socket.on('action', function(action) {
+    var uuid = action.uuid;
     var machine = getMachine(uuid);
-    machine.subscribe(socket);
-    subscribedMachines.push(machine);
-  });
-
-  socket.on('machine:command', function(uuid/*, ...*/) {
-    var commandArguments = Array.prototype.slice.call(arguments, 1);
-    var machine = getMachine(uuid);
-    machine._handleCommand.apply(machine, commandArguments);
-  });
-
-  socket.on('machine:unsubscribe', function(uuid) {
-    debug('Socket unsubscribe from ' + uuid);
-    var machine = getMachine(uuid);
-    machine.unsubscribe(socket);
-    subscribedMachines.splice(subscribedMachines.indexOf(machine), 1);
+    switch(action.type) {
+      case 'server/machine:subscribe':
+        machine.subscribe(socket);
+        subscribedMachines.push(machine);
+        break;
+      case 'server/machine:command':
+        var commandArguments = action.arguments;
+        machine._handleCommand.apply(machine, commandArguments);
+        break;
+      case 'server/machine:unsubscribe':
+        machine.unsubscribe(socket);
+        subscribedMachines.splice(subscribedMachines.indexOf(machine), 1);
+        break;
+      default:
+        console.error('Invalid action received: ', action);
+        socket.disconnect();
+        break;
+    }
   });
 
   socket.on('error', function(err) {
