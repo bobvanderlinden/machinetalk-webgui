@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "A webgui for Machinetalk",
   "scripts": {
-    "start": "node server.js",
-    "lint": "eslint ."
+    "start": "node server/server.js",
+    "lint": "eslint client server"
   },
   "repository": {
     "type": "git",
