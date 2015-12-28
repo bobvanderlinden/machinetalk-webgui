@@ -6,6 +6,8 @@ var config = require('../webpack.config')
 
 var express = require('express')
 var app = express()
+var http = require('http').Server(app)
+var io = require('socket.io')(http)
 
 var compiler = webpack(config)
 app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }))
@@ -16,7 +18,7 @@ app.use(function(req, res) {
 })
 
 var serverPort = process.env.PORT || 3000;
-var server = app.listen(serverPort, function(error) {
+var server = http.listen(serverPort, function(error) {
   if (error) {
     console.error(error)
   } else {
