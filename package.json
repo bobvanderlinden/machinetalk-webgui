@@ -16,10 +16,12 @@
   },
   "homepage": "http://rackt.github.io/redux",
   "dependencies": {
+    "debug": "^2.2.0",
     "history": "^1.17.0",
     "humps": "^0.6.0",
     "isomorphic-fetch": "^2.1.1",
     "lodash": "^3.10.1",
+    "machinetalk": "https://github.com/bobvanderlinden/node-machinetalk",
     "normalizr": "^1.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
