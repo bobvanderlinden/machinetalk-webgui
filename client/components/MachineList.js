@@ -3,15 +3,14 @@ import MachineListItem from './MachineListItem'
 
 export default class MachineList extends Component {
   static propTypes = {
-    machineDescriptions: PropTypes.array.isRequired
+    machines: PropTypes.array.isRequired
   }
   render() {
-    const { machineDescriptions } = this.props
-
+    const { machines } = this.props
     return (
       <div className="MachineList">
-        {machineDescriptions.map(machineDescription =>
-          <MachineListItem machineDescription={machineDescription} />
+        {machines.map(machine =>
+          <MachineListItem machine={machine} />
           )
         }
       </div>

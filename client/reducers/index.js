@@ -4,12 +4,32 @@ import { routerStateReducer as router } from 'redux-router'
 import { combineReducers } from 'redux'
 
 // Updates an entity cache in response to any action with response.entities.
-function status(state = { }, action) {
-  if (action.response && action.response.entities) {
-    return merge({}, state, action.response.entities)
+function machines(machines = [], action) {
+  const { type, uuid, host } = action
+  switch(type) {
+    case 'machine:online':
+      return [
+        ... machines,
+        {
+          uuid: uuid,
+          host: host
+        }
+      ]
+    case 'machine:offline':
+      return machines.filter(machine => machine.uuid !== uuid)
+    case 'machine:status':
+      return machines.map(machine => {
+        if (machine.uuid === uuid) {
+          return {
+            ... machine,
+            status: action.status
+          }
+        } else {
+          return machine
+        }
+      })
   }
-
-  return state
+  return machines
 }
 
 function errorMessage(state = null, action) {
@@ -25,7 +45,7 @@ function errorMessage(state = null, action) {
 }
 
 const rootReducer = combineReducers({
-  status,
+  machines,
   errorMessage,
   router
 })

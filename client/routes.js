@@ -7,6 +7,6 @@ import MachinePage from './containers/MachinePage'
 export default (
   <Route path="/" component={App}>
     <IndexRoute component={MachineListPage} />
-    <Route path="machine/:machineid" component={MachinePage} />
+    <Route path="machine/:machineUuid" component={MachinePage} />
   </Route>
 )
