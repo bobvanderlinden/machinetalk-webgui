@@ -27,4 +27,4 @@ To start the server use:
 ```
 npm start
 ```
-The server will listen on port 3000, so it should be available at http://localhost:3000/
+The server will listen on port 3000, so it should be available at [http://localhost:3000/](http://localhost:3000/)
